@@ -39,6 +39,8 @@ Kalau ragu — jangan lakukan. Minta izin tertulis dulu.
 | [`Metasploit/`](./Metasploit) | Exploitation | Eksploitasi, payload generation (MSFVenom), post-exploitation |
 | [`Wireshark-Tshark/`](./Wireshark-Tshark) | Network Analysis | Packet capture, filtering, analisis protokol |
 | [`Linux/`](./Linux) | System Administration | Navigasi, file management, proses, jaringan, hak akses |
+| [`Windows/`](./Windows) | System Administration | Navigasi, file management, proses, jaringan, hak akses |
+
 
 ---
 
