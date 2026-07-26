@@ -13,7 +13,9 @@ Panduan praktis dan ringkasan lengkap penggunaan **Wireshark** (GUI) dan **TShar
 6. [Analisis Protokol Populer](#6-analisis-protokol-populer)
 7. [Menganalisis Kinerja & Statistik Jaringan](#7-menganalisis-kinerja--statistik-jaringan)
 8. [Eksportasi Data & Ekstraksi File](#8-eksportasi-data--ekstraksi-file)
-9. [Tabel Referensi Flag TShark Populer](#9-tabel-referensi-flag-tshark-populer)
+9. [Follow Stream & Coloring Rules (Wireshark GUI)](#9-follow-stream--coloring-rules-wireshark-gui)
+10. [Capture pada Host Jarak Jauh (Remote Capture)](#10-capture-pada-host-jarak-jauh-remote-capture)
+11. [Tabel Referensi Flag TShark Populer](#11-tabel-referensi-flag-tshark-populer)
 
 ---
 
@@ -210,7 +212,52 @@ tshark -r capture.pcap --export-objects "http,./extracted_files"
 
 ---
 
-## 9. Tabel Referensi Flag TShark Populer
+## 9. Follow Stream & Coloring Rules (Wireshark GUI)
+
+Fitur-fitur berikut hanya tersedia di **Wireshark GUI**, tidak melalui `tshark` (CLI).
+
+### 🔹 Follow TCP/UDP/HTTP Stream
+```text
+Klik kanan pada paket → Follow → TCP Stream
+```
+* **Penjelasan:** Menampilkan seluruh isi percakapan (request & response) dari satu koneksi secara berurutan dan mudah dibaca — sangat berguna untuk melihat isi login form, isi file yang ditransfer, atau payload serangan secara utuh.
+* Tersedia juga **Follow HTTP Stream**, **Follow TLS Stream** (butuh *session key* untuk mendekripsi), dan **Follow UDP Stream**.
+
+### 🔹 Coloring Rules
+```text
+View → Coloring Rules
+```
+* **Penjelasan:** Wireshark otomatis mewarnai paket berdasarkan jenis protokol/kondisi (misal: merah untuk error, hitam untuk retransmission). Aturan ini bisa dikustomisasi untuk menyorot pola traffic tertentu secara visual saat analisis manual.
+
+### 🔹 Expert Information
+```text
+Analyze → Expert Information
+```
+* **Penjelasan:** Menampilkan ringkasan otomatis masalah jaringan yang terdeteksi (retransmisi, checksum error, connection reset, dll) tanpa perlu menelusuri paket satu per satu.
+
+---
+
+## 10. Capture pada Host Jarak Jauh (Remote Capture)
+
+### 🔹 Capture via SSH ke Server Remote
+```bash
+ssh user@192.168.1.10 "tcpdump -i eth0 -w -" | wireshark -k -i -
+```
+* **Penjelasan:** Menjalankan `tcpdump` di server remote melalui SSH, lalu meneruskan hasilnya secara langsung (*pipe*) ke Wireshark lokal untuk dianalisis secara real-time tanpa perlu menyalin file `.pcap` terlebih dahulu.
+
+### 🔹 Menggunakan `rpcapd` (Remote Packet Capture Daemon)
+```bash
+# Di server target:
+rpcapd -p 2002 -l 192.168.1.50
+
+# Di Wireshark lokal:
+# Capture → Options → Manage Interfaces → Remote Interfaces → tambahkan host:port
+```
+* **`rpcapd`**: Daemon bawaan libpcap/WinPcap yang memungkinkan Wireshark menangkap trafik langsung dari interface jaringan mesin lain melalui jaringan.
+
+---
+
+## 11. Tabel Referensi Flag TShark Populer
 
 | Flag Singkat | Flag Panjang | Fungsi / Deskripsi |
 | :--- | :--- | :--- |
