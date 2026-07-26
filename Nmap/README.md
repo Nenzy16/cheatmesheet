@@ -115,6 +115,12 @@ nmap -sn 192.168.1.0/24
 ```
 * **`-sn`**: Memeriksa host mana saja yang aktif (*live host*) tanpa melakukan *port scanning* (dikenal juga sebagai Ping Sweep).
 
+### 🔹 Idle / Zombie Scan (`-sI`)
+```bash
+nmap -sI zombie_host.com 192.168.1.1
+```
+* **`-sI <zombie>`**: Menggunakan host pihak ketiga ("zombie") yang idle untuk memindai target secara tidak langsung, sehingga IP asli penyerang tidak muncul di log target. Membutuhkan zombie host dengan pola *IP ID* yang predictable (jarang ditemukan di sistem modern).
+
 ---
 
 ## 4. Penentuan Port (Port Specification)
@@ -205,6 +211,30 @@ nmap --script http-title 192.168.1.1
 nmap --script vuln 192.168.1.1
 ```
 * **`--script vuln`**: Menjalankan kategori skrip untuk memeriksa berbagai kerentanan keamanan populer (*CVEs*).
+
+### 🔹 Kategori Script NSE Lainnya
+
+NSE mengelompokkan skrip ke dalam beberapa kategori yang bisa dipanggil sekaligus per kategori:
+
+```bash
+nmap --script auth 192.168.1.1
+nmap --script discovery 192.168.1.1
+nmap --script brute 192.168.1.1
+nmap --script safe 192.168.1.1
+nmap --script exploit 192.168.1.1
+```
+
+| Kategori | Fungsi / Deskripsi |
+| :--- | :--- |
+| `auth` | Mendeteksi masalah autentikasi, seperti kredensial default |
+| `discovery` | Mengumpulkan informasi tambahan tentang jaringan/target (nama host, shares, dll) |
+| `brute` | Melakukan *brute-force* kredensial pada layanan yang mendukung (FTP, SSH, dll) |
+| `safe` | Skrip yang dianggap aman, tidak berisiko mengganggu layanan target |
+| `intrusive` | Skrip yang berpotensi mengganggu atau membebani layanan target |
+| `vuln` | Memeriksa kerentanan keamanan yang sudah diketahui (CVE) |
+| `exploit` | Mencoba mengeksploitasi kerentanan yang ditemukan |
+
+> ⚠️ **Catatan:** Kategori `brute`, `intrusive`, dan `exploit` bisa mengganggu stabilitas layanan target — gunakan hanya pada lingkungan yang sudah diberi izin eksplisit.
 
 ### 🔹 Mengirim Argumen ke Skrip (`--script-args`)
 ```bash
@@ -314,5 +344,7 @@ nmap -oA hasil_scan 192.168.1.1
 | `-oA` | `--output-all` | Menyimpan hasil scan ke semua format file sekaligus |
 | `-Pn` | `--no-ping` | Menganggap semua host aktif (abaikan cek ping) |
 | `-v` | `--verbose` | Menampilkan log alur pemindaian secara *real-time* |
+| `-sI` | `--idle-scan` | Idle/zombie scan menggunakan host pihak ketiga |
+| `--script <kategori>` | `--script` | Menjalankan kategori skrip NSE (`auth`, `discovery`, `brute`, dll) |
 
 ---
