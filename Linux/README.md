@@ -12,7 +12,12 @@ Panduan praktis dan ringkasan lengkap penggunaan **perintah dasar Linux** (*Linu
 5. [Manajemen Proses & Sistem](#5-manajemen-proses--sistem)
 6. [Jaringan & Transfer File](#6-jaringan--transfer-file)
 7. [Pencarian Berkas (Finding Files)](#7-pencarian-berkas-finding-files)
-8. [Tabel Referensi Perintah Populer](#8-tabel-referensi-perintah-populer)
+8. [Manajemen Paket (Package Management)](#8-manajemen-paket-package-management)
+9. [Manajemen Service & Systemd](#9-manajemen-service--systemd)
+10. [Penjadwalan Tugas (Cron Jobs)](#10-penjadwalan-tugas-cron-jobs)
+11. [SSH & Key Management](#11-ssh--key-management)
+12. [Kompresi & Arsip Berkas](#12-kompresi--arsip-berkas)
+13. [Tabel Referensi Perintah Populer](#13-tabel-referensi-perintah-populer)
 
 ---
 
@@ -200,7 +205,161 @@ find /var/www -type f -name "*.php"
 
 ---
 
-## 8. Tabel Referensi Perintah Populer
+## 8. Manajemen Paket (Package Management)
+
+Perintah untuk memasang, memperbarui, dan menghapus perangkat lunak berbeda-beda tergantung distribusi Linux yang digunakan.
+
+### 🔹 Debian / Ubuntu (`apt`)
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install nmap -y
+sudo apt remove nmap -y
+```
+* **`apt update`**: Memperbarui daftar paket dari repository.
+* **`apt upgrade`**: Memperbarui seluruh paket terpasang ke versi terbaru.
+* **`apt install` / `apt remove`**: Memasang atau menghapus paket tertentu.
+
+### 🔹 RHEL / CentOS / Fedora (`yum` / `dnf`)
+```bash
+sudo dnf install nmap -y
+sudo dnf remove nmap -y
+```
+* **`dnf`**: Pengganti `yum` di distro modern (Fedora, RHEL 8+, CentOS Stream).
+
+### 🔹 Mencari Paket & Melihat Informasi
+```bash
+apt search wireshark
+apt show wireshark
+```
+* **`search`**: Mencari nama paket berdasarkan kata kunci.
+* **`show`**: Menampilkan detail versi, dependensi, dan deskripsi paket.
+
+---
+
+## 9. Manajemen Service & Systemd
+
+`systemctl` adalah alat utama untuk mengelola *service* (daemon) pada sistem Linux modern (systemd-based).
+
+### 🔹 Mengelola Status Service
+```bash
+sudo systemctl start ssh
+sudo systemctl stop ssh
+sudo systemctl restart ssh
+sudo systemctl status ssh
+```
+* **`start` / `stop` / `restart`**: Menjalankan, menghentikan, atau me-restart service.
+* **`status`**: Menampilkan status aktif/tidak beserta log terakhir.
+
+### 🔹 Mengaktifkan Service Saat Boot
+```bash
+sudo systemctl enable ssh
+sudo systemctl disable ssh
+```
+* **`enable`**: Membuat service berjalan otomatis saat sistem dinyalakan.
+* **`disable`**: Mencegah service berjalan otomatis saat boot.
+
+### 🔹 Melihat Log Service (`journalctl`)
+```bash
+journalctl -u ssh -f
+```
+* **`-u <service>`**: Menampilkan log khusus untuk unit/service tertentu.
+* **`-f`**: Mode *follow*, menampilkan log baru secara real-time.
+
+---
+
+## 10. Penjadwalan Tugas (Cron Jobs)
+
+`cron` digunakan untuk menjalankan perintah/skrip secara otomatis pada waktu yang terjadwal.
+
+### 🔹 Mengedit Jadwal Cron Pengguna
+```bash
+crontab -e
+```
+
+### 🔹 Format Penjadwalan Cron
+```text
+* * * * * /path/ke/skrip.sh
+│ │ │ │ │
+│ │ │ │ └── Hari (0-6, Minggu=0)
+│ │ │ └──── Bulan (1-12)
+│ │ └────── Tanggal (1-31)
+│ └──────── Jam (0-23)
+└────────── Menit (0-59)
+```
+
+### 🔹 Contoh Praktis
+```bash
+0 2 * * * /home/user/backup.sh        # Jalankan setiap jam 2 pagi
+*/15 * * * * /home/user/monitor.sh    # Jalankan setiap 15 menit
+```
+
+### 🔹 Melihat Jadwal Cron Aktif
+```bash
+crontab -l
+```
+* **`-l`**: Menampilkan daftar cron job milik user saat ini.
+
+---
+
+## 11. SSH & Key Management
+
+### 🔹 Membuat Pasangan SSH Key
+```bash
+ssh-keygen -t ed25519 -C "email@contoh.com"
+```
+* **`-t`**: Menentukan tipe algoritma key (`ed25519` direkomendasikan, `rsa` untuk kompatibilitas lama).
+* **`-C`**: Menambahkan komentar/label pada key (biasanya email).
+
+### 🔹 Menyalin Public Key ke Server (`ssh-copy-id`)
+```bash
+ssh-copy-id user@192.168.1.10
+```
+* **Penjelasan:** Menambahkan public key lokal ke `~/.ssh/authorized_keys` di server tujuan, memungkinkan login tanpa password.
+
+### 🔹 Login SSH dengan Key Spesifik
+```bash
+ssh -i ~/.ssh/id_ed25519 user@192.168.1.10
+```
+* **`-i <file>`**: Menentukan private key yang digunakan untuk autentikasi.
+
+### 🔹 Transfer Berkas via SSH (`scp`)
+```bash
+scp file.txt user@192.168.1.10:/home/user/
+scp -r folder/ user@192.168.1.10:/home/user/
+```
+* **`-r`**: Menyalin direktori beserta seluruh isinya secara rekursif.
+
+---
+
+## 12. Kompresi & Arsip Berkas
+
+### 🔹 Membuat Arsip TAR (`tar`)
+```bash
+tar -czvf arsip.tar.gz /path/ke/folder
+```
+* **`-c`**: Membuat arsip baru.
+* **`-z`**: Kompresi menggunakan gzip.
+* **`-v`**: Mode verbose, menampilkan proses.
+* **`-f`**: Menentukan nama file arsip output.
+
+### 🔹 Mengekstrak Arsip TAR
+```bash
+tar -xzvf arsip.tar.gz -C /path/tujuan
+```
+* **`-x`**: Mengekstrak isi arsip.
+* **`-C`**: Menentukan direktori tujuan hasil ekstraksi.
+
+### 🔹 Kompresi & Ekstraksi ZIP
+```bash
+zip -r arsip.zip folder/
+unzip arsip.zip -d /path/tujuan
+```
+* **`zip -r`**: Mengompresi folder secara rekursif ke dalam `.zip`.
+* **`unzip -d`**: Mengekstrak isi `.zip` ke direktori tujuan tertentu.
+
+---
+
+## 13. Tabel Referensi Perintah Populer
 
 | Perintah | Opsi / Flag | Fungsi / Deskripsi |
 | :--- | :--- | :--- |
@@ -215,5 +374,11 @@ find /var/www -type f -name "*.php"
 | `kill` | `-9` | Mematikan proses secara paksa berdasarkan PID |
 | `df` | `-h` | Menampilkan informasi kapasitas dan ruang disk sistem |
 | `find` | `-type f` | Mencari berkas fisik berdasarkan kriteria tertentu |
+| `apt`/`dnf` | `install` | Memasang paket perangkat lunak dari repository |
+| `systemctl` | `status` | Melihat/mengelola status service systemd |
+| `crontab` | `-e` | Mengedit jadwal tugas otomatis (cron job) |
+| `ssh-keygen` | `-t ed25519` | Membuat pasangan SSH key baru |
+| `scp` | `-r` | Menyalin berkas/folder antar host via SSH |
+| `tar` | `-czvf` | Membuat arsip terkompresi `.tar.gz` |
 
 ---
