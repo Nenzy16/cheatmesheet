@@ -12,7 +12,9 @@ Panduan praktis dan ringkasan lengkap penggunaan **cURL** (*Client URL*) untuk m
 5. [Manajemen File & Unduhan](#5-manajemen-file--unduhan)
 6. [Debugging, Log, & Output](#6-debugging-log--output)
 7. [Penanganan Cookie & Session](#7-penanganan-cookie--session)
-8. [Tabel Referensi Flag Populer](#8-tabel-referensi-flag-populer)
+8. [Opsi Data Lanjutan (Binary & Compression)](#8-opsi-data-lanjutan-binary--compression)
+9. [Proxy & Timeout](#9-proxy--timeout)
+10. [Tabel Referensi Flag Populer](#10-tabel-referensi-flag-populer)
 
 ---
 
@@ -202,7 +204,55 @@ curl -b cookies.txt https://example.com/dashboard
 
 ---
 
-## 8. Tabel Referensi Flag Populer
+## 8. Opsi Data Lanjutan (Binary & Compression)
+
+### 🔹 Mengirim Data Biner Tanpa Modifikasi (`--data-binary`)
+```bash
+curl -X POST https://api.example.com/upload \
+  -H "Content-Type: application/octet-stream" \
+  --data-binary @file.bin
+```
+* **`--data-binary`**: Berbeda dari `-d`, opsi ini mengirim data **persis apa adanya** (termasuk baris baru/newline) tanpa proses encoding tambahan. Wajib dipakai untuk data biner atau JSON multi-baris agar tidak rusak.
+
+### 🔹 Meminta Respon Terkompresi (`--compressed`)
+```bash
+curl --compressed https://api.example.com/data
+```
+* **`--compressed`**: Meminta server mengirim respon dalam format terkompresi (gzip/deflate/br) lalu otomatis didekompresi oleh cURL — mempercepat transfer pada payload besar.
+
+### 🔹 Menentukan Versi HTTP (`--http1.1` / `--http2`)
+```bash
+curl --http2 https://api.example.com/data
+```
+* **`--http2`**: Memaksa cURL menggunakan protokol HTTP/2 (berguna untuk menguji server yang mendukung multiplexing).
+
+---
+
+## 9. Proxy & Timeout
+
+### 🔹 Meneruskan Request Melalui Proxy (`-x`)
+```bash
+curl -x http://127.0.0.1:8080 https://api.example.com/data
+```
+* **`-x` / `--proxy`**: Meneruskan request melalui *proxy* (misalnya Burp Suite atau OWASP ZAP) agar bisa diintersep dan dianalisis lebih lanjut.
+
+### 🔹 Mengatur Batas Waktu Koneksi (`--connect-timeout` & `-m`)
+```bash
+curl --connect-timeout 5 -m 15 https://api.example.com/data
+```
+* **`--connect-timeout <detik>`**: Batas waktu maksimum saat proses membangun koneksi awal.
+* **`-m <detik>` / `--max-time`**: Batas waktu maksimum untuk keseluruhan proses request (termasuk transfer data).
+
+### 🔹 Mengatur Ulang Percobaan Jika Gagal (`--retry`)
+```bash
+curl --retry 3 --retry-delay 2 https://api.example.com/data
+```
+* **`--retry <jumlah>`**: Mengulang request secara otomatis jika terjadi error transient (misal timeout/5xx).
+* **`--retry-delay <detik>`**: Jeda waktu antar percobaan ulang.
+
+---
+
+## 10. Tabel Referensi Flag Populer
 
 | Flag Singkat | Flag Panjang | Fungsi / Deskripsi |
 | :--- | :--- | :--- |
@@ -222,5 +272,10 @@ curl -b cookies.txt https://example.com/dashboard
 | `-C` | `--continue-at` | Melanjutkan proses unduhan yang terputus |
 | `-c` | `--cookie-jar` | Menyimpan *cookie* dari respon ke dalam berkas |
 | `-b` | `--cookie` | Mengirimkan *cookie* dari berkas/string ke server |
+| `--data-binary` | `--data-binary` | Mengirim data biner/JSON apa adanya tanpa encoding tambahan |
+| `--compressed` | `--compressed` | Meminta & otomatis mendekompresi respon terkompresi |
+| `-x` | `--proxy` | Meneruskan request melalui server proxy |
+| `-m` | `--max-time` | Batas waktu maksimum keseluruhan request |
+| `--retry` | `--retry` | Mengulang otomatis request yang gagal |
 
 ---
