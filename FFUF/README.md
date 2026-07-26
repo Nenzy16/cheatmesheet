@@ -13,7 +13,9 @@ Panduan praktis dan ringkasan lengkap penggunaan **FFUF** (*Fuzz Faster U Fool*)
 6. [Opsi HTTP Header, Cookie, & Autentikasi](#6-opsi-http-header-cookie--autentikasi)
 7. [Pengaturan Performa & Proxy](#7-pengaturan-performa--proxy)
 8. [Opsi Output & Penyimpanan](#8-opsi-output--penyimpanan)
-9. [Tabel Referensi Flag Populer](#9-tabel-referensi-flag-populer)
+9. [Multiple Wordlist & Auto-Calibration](#9-multiple-wordlist--auto-calibration)
+10. [Rekomendasi Wordlist (SecLists)](#10-rekomendasi-wordlist-seclists)
+11. [Tabel Referensi Flag Populer](#11-tabel-referensi-flag-populer)
 
 ---
 
@@ -187,7 +189,54 @@ ffuf -u https://example.com/FUZZ -w wordlist.txt   -o hasil_scan.json -of json
 
 ---
 
-## 9. Tabel Referensi Flag Populer
+## 9. Multiple Wordlist & Auto-Calibration
+
+### 🔹 Menggunakan Lebih dari Satu Wordlist (`-w nama:WORDLIST`)
+```bash
+ffuf -u https://example.com/FUZZ1/FUZZ2 \
+  -w users.txt:FUZZ1 -w passwords.txt:FUZZ2 \
+  -mode clusterbomb
+```
+* **`-w <file>:<KEYWORD>`**: Memberi nama unik pada tiap wordlist agar bisa ditempatkan pada posisi `FUZZ` yang berbeda.
+* **`-mode`**: Menentukan cara kombinasi antar-wordlist:
+  * `clusterbomb` — mencoba **semua kombinasi** antar wordlist (jumlah request = perkalian baris tiap wordlist).
+  * `pitchfork` — memasangkan entri berdasarkan **nomor baris yang sama** (jumlah request = baris wordlist terpendek). Cocok untuk pasangan user:pass yang sudah presisi (credential stuffing).
+
+### 🔹 Auto-Calibration untuk Mengurangi False Positive (`-ac`)
+```bash
+ffuf -u https://example.com/FUZZ -w wordlist.txt -ac
+```
+* **`-ac`**: FFUF otomatis mengirim beberapa request "acak" ke server untuk mempelajari pola respon *baseline* (misal ukuran halaman 404 custom), lalu memfilter hasil serupa secara otomatis — alternatif praktis dari `-fs`/`-fw` manual.
+
+### 🔹 Membatasi Total Waktu Pemindaian (`-maxtime`)
+```bash
+ffuf -u https://example.com/FUZZ -w wordlist.txt -maxtime 300
+```
+* **`-maxtime <detik>`**: Menghentikan seluruh proses fuzzing secara otomatis setelah durasi tertentu, berguna untuk scan yang dijadwalkan/otomatis.
+
+---
+
+## 10. Rekomendasi Wordlist (SecLists)
+
+Kualitas hasil fuzzing sangat bergantung pada wordlist yang digunakan. [**SecLists**](https://github.com/danielmiessler/SecLists) adalah kumpulan wordlist paling umum dipakai di komunitas pentest.
+
+```bash
+git clone https://github.com/danielmiessler/SecLists.git /usr/share/seclists
+```
+
+| Kebutuhan | Contoh Path Wordlist (SecLists) |
+| :--- | :--- |
+| Direktori & file umum | `Discovery/Web-Content/common.txt`, `Discovery/Web-Content/raft-large-directories.txt` |
+| Subdomain enumeration | `Discovery/DNS/subdomains-top1million-5000.txt` |
+| Nama parameter | `Discovery/Web-Content/burp-parameter-names.txt` |
+| Username umum | `Usernames/top-usernames-shortlist.txt` |
+| Password umum | `Passwords/Common-Credentials/10-million-password-list-top-1000000.txt` |
+
+> 💡 **Tips:** Mulai dari wordlist yang lebih kecil (`common.txt`) untuk scan cepat, baru gunakan wordlist besar (`raft-large-*`) jika target menunjukkan indikasi ada lebih banyak konten tersembunyi.
+
+---
+
+## 11. Tabel Referensi Flag Populer
 
 | Flag Singkat | Flag Panjang | Fungsi / Deskripsi |
 | :--- | :--- | :--- |
@@ -211,5 +260,9 @@ ffuf -u https://example.com/FUZZ -w wordlist.txt   -o hasil_scan.json -of json
 | `-o` | `--output` | Menyimpan hasil ke dalam berkas |
 | `-of` | `--output-format` | Menentukan format output (`json`, `csv`, `html`, `md`, `all`) |
 | `-s` | `--silent` | Mode senyap (hanya menampilkan data hasil tanpa banner/header) |
+| `-mode` | `--mode` | Mode kombinasi multi-wordlist (`clusterbomb` atau `pitchfork`) |
+| `-ac` | `--auto-calibration` | Otomatis mendeteksi & memfilter respon *false positive* |
+| `-maxtime` | `--maxtime` | Membatasi total durasi pemindaian (dalam detik) |
+| `-se` | `--stop-on-errors` | Menghentikan scan otomatis jika terlalu banyak error koneksi |
 
 ---
