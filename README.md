@@ -36,11 +36,13 @@ Kalau ragu — jangan lakukan. Minta izin tertulis dulu.
 | [`Nmap/`](./Nmap) | Reconnaissance / Scanning | Port scanning, deteksi service & OS, NSE scripting |
 | [`FFUF/`](./FFUF) | Web Fuzzing | Directory brute force, subdomain/VHOST enum, parameter fuzzing |
 | [`cURL/`](./cURL) | Web / API Testing | HTTP request manual, debugging API, autentikasi |
+| [`SQLMap/`](./SQLMap) | Web Vulnerability | Deteksi & eksploitasi SQL Injection otomatis |
+| [`Netcat/`](./Netcat) | Exploitation / Utility | Reverse/bind shell, transfer file, port scanning ringan |
 | [`Metasploit/`](./Metasploit) | Exploitation | Eksploitasi, payload generation (MSFVenom), post-exploitation |
+| [`Privilege-Escalation-Linux/`](./Privilege-Escalation-Linux) | Post-Exploitation | Enumerasi & eskalasi privilege pada sistem Linux |
 | [`Wireshark-Tshark/`](./Wireshark-Tshark) | Network Analysis | Packet capture, filtering, analisis protokol |
 | [`Linux/`](./Linux) | System Administration | Navigasi, file management, proses, jaringan, hak akses |
-| [`Windows/`](./Windows) | System Administration | Navigasi, file management, proses, jaringan, hak akses |
-
+| [`Windows-CMD-PowerShell/`](./Windows-CMD-PowerShell) | System Administration | Navigasi, enumerasi, & administrasi sistem Windows |
 
 ---
 
@@ -65,10 +67,10 @@ Cheatsheet di repo ini pada dasarnya mengikuti alur *penetration testing* yang u
 ```text
 1. Reconnaissance      → Nmap (port & service discovery)
 2. Web Enumeration     → FFUF (directory/subdomain fuzzing) + cURL (manual request testing)
-3. Vulnerability Scan  → Nmap NSE (--script vuln), Wireshark/TShark (analisis traffic mencurigakan)
-4. Exploitation        → Metasploit (msfconsole, msfvenom)
-5. Post-Exploitation   → Meterpreter, privilege escalation, lateral movement
-6. System Handling     → Linux commands (setelah mendapatkan akses shell)
+3. Vulnerability Scan  → Nmap NSE (--script vuln), SQLMap (SQL Injection), Wireshark/TShark (analisis traffic mencurigakan)
+4. Exploitation        → Metasploit (msfconsole, msfvenom), Netcat (listener/shell handler)
+5. Post-Exploitation   → Meterpreter, Privilege Escalation (Linux/Windows), lateral movement
+6. System Handling     → Linux commands & Windows CMD/PowerShell (setelah mendapatkan akses shell)
 ```
 
 > 💡 **Tips:** Alur di atas tidak selalu linear — di dunia nyata, kamu akan bolak-balik antara *recon* dan *exploitation* seiring ditemukannya informasi baru.
@@ -80,7 +82,7 @@ Cheatsheet di repo ini pada dasarnya mengikuti alur *penetration testing* yang u
 Repo ini awalnya dibuat untuk kebutuhan pribadi, tapi kontribusi tetap terbuka:
 
 * Temukan kesalahan atau flag yang sudah *deprecated*? Buka [Issue](../../issues) atau [Pull Request](../../pulls).
-* Ingin menambahkan cheatsheet tool baru? Silakan ajukan PR dengan format yang sama seperti berkas lain di repo ini.
+* Ingin menambahkan cheatsheet tool baru (misal SQLMap, Hydra, Burp Suite)? Silakan ajukan PR dengan format yang sama seperti berkas lain di repo ini.
 
 ---
 
